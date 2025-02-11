@@ -1,0 +1,35 @@
+// {
+//   "compilerOptions": {
+//     "target": "es2016",
+//     "lib": ["es6"],
+//     "module": "ESNext",
+//     "allowJs": true,
+//     "outDir": "build",
+//     "esModuleInterop": true,
+//     "forceConsistentCasingInFileNames": true,
+//     "strict": true,
+//     "noImplicitAny": true,
+//     "skipLibCheck": true,
+//     "moduleResolution": "node"
+//   },
+//   "exclude": ["node_modules"],
+//   "include": ["src/**/*"]
+// }
+
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "lib": ["es6"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "rootDir": "src",
+    "outDir": "build",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
+}
+
