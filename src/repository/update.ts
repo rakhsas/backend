@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import logger from './../core/logger/logger';
 import { config as pool } from '../core/dbconfig/config';
 import pg from 'pg';
 
@@ -45,7 +45,7 @@ const update = async (
 			);
 			return false;
 		}
-		Logger.log(`Record updated in ${tableName} table.`);
+		logger.info(`Record updated in ${tableName} table.`);
 		return result.rowCount !== null && result.rowCount > 0;
 	} catch (error) {
 		console.error(`Error updating record in ${tableName}:`, error);

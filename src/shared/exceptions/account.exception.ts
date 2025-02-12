@@ -1,11 +1,12 @@
-import { HttpStatus } from 'http-status-ts';
+// import { Error } from "../utils/error.exception";
 
 export class AccountNotVerifiedException extends Error {
-	statusCode: HttpStatus = HttpStatus.UNAUTHORIZED;
+	status: number;
 	constructor(
 		message = 'Account not verified. A verification link has been sent to your email.',
+		status = 401,
 	) {
 		super(message);
-		this.name = this.constructor.name;
+		this.status = status;
 	}
 }

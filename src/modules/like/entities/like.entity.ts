@@ -7,24 +7,30 @@ const columns = {
 	viewed_At: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
 };
 
-let model = null;
-(async () => {
-	const foreignKey: foreignKey[] = [
-		{
-			column: 'liked_id',
-			refTable: 'users',
-			refColumn: 'id',
-			onDelete: 'CASCADE',
-			onUpdate: 'CASCADE',
-		},
-		{
-			column: 'user_id',
-			refTable: 'users',
-			refColumn: 'id',
-			onDelete: 'CASCADE',
-			onUpdate: 'CASCADE',
-		},
-	];
-	model = createModel({ tableName: 'likes', columns, foreignKey });
-	model.syncTable();
-})();
+const foreignKey: foreignKey[] = [
+	{
+		column: 'liked_id',
+		refTable: 'users',
+		refColumn: 'id',
+		onDelete: 'CASCADE',
+		onUpdate: 'CASCADE',
+	},
+	{
+		column: 'user_id',
+		refTable: 'users',
+		refColumn: 'id',
+		onDelete: 'CASCADE',
+		onUpdate: 'CASCADE',
+	},
+];
+const model = createModel({ tableName: 'likes', columns, foreignKey });
+
+export default {
+	syncTable: async () => {
+		try {
+			await model.syncTable();
+		} catch (error) {
+			console.error('❌ Error syncing likes table:', error);
+		}
+	},
+};

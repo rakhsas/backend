@@ -48,10 +48,10 @@ export const generateTokens = async (user: any) => {
 			),
 		};
 		const aToken = jwt.sign(payload, process.env.ATOKEN_SECRET || '', {
-			expiresIn: process.env.ATOKEN_VALIDITY_DURATION,
+			expiresIn: parseInt(process.env.ATOKEN_VALIDITY_DURATION || '0'),
 		});
 		const rToken = jwt.sign(payload, process.env.RTOKEN_SECRET || '', {
-			expiresIn: process.env.RTOKEN_VALIDITY_DURATION,
+			expiresIn: parseInt(process.env.RTOKEN_VALIDITY_DURATION || '0'),
 		});
 		return {
 			aToken,
@@ -97,7 +97,11 @@ export const generateVerificationLink = (email: string) => {
 		const verificationToken = jwt.sign(
 			payload,
 			process.env.VTOKEN_SECRET || '',
-			{ expiresIn: process.env.VERIFICATION_TOKEN_DURATION },
+			{
+				expiresIn: parseInt(
+					process.env.VERIFICATION_TOKEN_DURATION || '0',
+				),
+			},
 		);
 		return `${process.env.CLIENT_URL}/api/authenticate/verify?csf=${verificationToken}`;
 	} catch (err) {
@@ -166,7 +170,7 @@ function generateResetLink(user: any) {
 		),
 	};
 	const resetToken = jwt.sign(payload, process.env.ATOKEN_SECRET || '', {
-		expiresIn: process.env.RESET_TOKEN_DURATION,
+		expiresIn: parseInt(process.env.RESET_TOKEN_DURATION || '0'),
 	});
 	return `http://${process.env.CLIENT_URL}/api/authenticate/reset-password-ver?csf=${resetToken}`;
 }
