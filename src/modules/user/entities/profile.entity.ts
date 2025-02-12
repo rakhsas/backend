@@ -15,26 +15,36 @@ const columns = {
 	user_id: 'UUID NOT NULL',
 };
 
-let userModel = null;
-(async () => {
-	await createType({ typeName: 'gender', values: ['M', 'F'] });
-	await createType({
-		typeName: 'sexualpreferences',
-		values: ['M', 'F', 'B'],
-	});
-	await createType({
-		typeName: 'interests',
-		values: ['VEGAN', 'GEEK', 'PIERCING'],
-	});
-	const foreignKey: foreignKey[] = [
-		{
-			column: 'user_id',
-			refTable: 'users',
-			refColumn: 'id',
-			onDelete: 'CASCADE',
-			onUpdate: 'CASCADE',
-		},
-	];
-	userModel = createModel({ tableName: 'profile', columns, foreignKey });
-	await userModel.syncTable();
-})();
+const foreignKey: foreignKey[] = [
+	{
+		column: 'user_id',
+		refTable: 'users',
+		refColumn: 'id',
+		onDelete: 'CASCADE',
+		onUpdate: 'CASCADE',
+	},
+];
+
+export default {
+	syncTable: async () => {
+		await createType({ typeName: 'gender', values: ['M', 'F'] });
+		await createType({
+			typeName: 'sexualpreferences',
+			values: ['M', 'F', 'B'],
+		});
+		await createType({
+			typeName: 'interests',
+			values: ['VEGAN', 'GEEK', 'PIERCING'],
+		});
+		const userModel = createModel({
+			tableName: 'profile',
+			columns,
+			foreignKey,
+		});
+		try {
+			await userModel.syncTable();
+		} catch (err) {
+			console.error('❌ Error syncing profile table:', err);
+		}
+	},
+};

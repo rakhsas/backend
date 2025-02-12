@@ -1,5 +1,5 @@
 import chokidar from 'chokidar';
-import { logger } from './logger'; // Assuming logger is set up as in your code
+import logger from './logger'; // Assuming logger is set up as in your code
 
 // Initialize watcher with options if needed
 const watcher = chokidar.watch('./src', {
@@ -9,17 +9,17 @@ const watcher = chokidar.watch('./src', {
 
 // Watch for file changes and log them
 watcher.on('change', (path: string) => {
-	logger.log(`File changed: ${path}`);
+	logger.info(`File changed: ${path}`);
 });
 
 watcher.on('add', (path: string) => {
-	logger.log(`File added: ${path}`);
+	logger.info(`File added: ${path}`);
 });
 
 watcher.on('unlink', (path: string) => {
-	logger.log(`File removed: ${path}`);
+	logger.info(`File removed: ${path}`);
 });
 
-watcher.on('error', (error: Error) => {
+watcher.on('error', (error: any) => {
 	logger.error('Watcher error', error);
 });

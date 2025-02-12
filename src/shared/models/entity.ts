@@ -1,6 +1,6 @@
 import { config as pool } from '../../core/dbconfig/config';
 import pg from 'pg';
-import { logger } from '../../core/logger/logger';
+import logger from '../../core/logger/logger';
 
 export interface foreignKey {
 	column: string;
@@ -30,7 +30,7 @@ export const createType = async ({
         END $$;
     `;
 	await (pool as pg.Pool).query(query);
-	logger.log(`Created type ${typeName}`);
+	logger.info(`Created type ${typeName}`);
 };
 export const createModel = ({
 	tableName,
@@ -61,8 +61,13 @@ export const createModel = ({
 			}) `;
 		},
 		async syncTable() {
-			await (pool as pg.Pool).query(this.createTableQuery());
-			logger.log(`Created table ${this.tableName}`);
+			try {
+				await (pool as pg.Pool).query(this.createTableQuery());
+			} catch (error) {
+				console.log('hereeeeeeeee entity', tableName);
+				throw error;
+			}
+			logger.info(`Created table ${this.tableName}`);
 			const existingColumnsResult = await (pool as pg.Pool).query(
 				`
                 SELECT 
@@ -124,7 +129,7 @@ export const createModel = ({
 			)) {
 				const alterQuery = `ALTER TABLE ${this.tableName} ADD COLUMN ${column} ${type}`;
 				await (pool as pg.Pool).query(alterQuery);
-				logger.log(`Added column ${column} to ${this.tableName}`);
+				logger.info(`Added column ${column} to ${this.tableName}`);
 			}
 
 			for (const column of extraColumns) {
@@ -134,7 +139,7 @@ export const createModel = ({
 				) {
 					const dropQuery = `ALTER TABLE ${this.tableName} DROP COLUMN ${column}`;
 					await (pool as pg.Pool).query(dropQuery);
-					logger.log(
+					logger.info(
 						`Dropped column ${column} from ${this.tableName}`,
 					);
 				}
@@ -159,7 +164,7 @@ export const createModel = ({
 							nullable ? 'DROP NOT NULL' : 'SET NOT NULL'
 						}`;
 						await (pool as pg.Pool).query(alterNullQuery);
-						logger.log(
+						logger.info(
 							`Updated nullability of ${column} to ${
 								nullable ? 'nullable' : 'not nullable'
 							}`,
@@ -172,13 +177,13 @@ export const createModel = ({
 					) {
 						const alterDefaultQuery = `ALTER TABLE ${this.tableName} ALTER COLUMN ${column} SET DEFAULT ${columnDefault}`;
 						await (pool as pg.Pool).query(alterDefaultQuery);
-						logger.log(
+						logger.info(
 							`Updated default value of ${column} to ${columnDefault}`,
 						);
 					} else if (!columnDefault && existingColumn.default) {
 						const dropDefaultQuery = `ALTER TABLE ${this.tableName} ALTER COLUMN ${column} DROP DEFAULT`;
 						await (pool as pg.Pool).query(dropDefaultQuery);
-						logger.log(`Dropped default value of ${column}`);
+						logger.info(`Dropped default value of ${column}`);
 					}
 				}
 				if (

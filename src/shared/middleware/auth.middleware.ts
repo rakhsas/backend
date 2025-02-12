@@ -7,9 +7,10 @@ import {
 	AccessTokenNotFoundException,
 	InvalidRefreshTokenException,
 } from '../exceptions/auth.exception';
-import { HttpStatus } from 'http-status-ts';
+// import { HttpStatus } from 'http-status-ts';
 import { NextFunction } from 'express';
 import { Response } from 'express';
+import { HttpStatusWrapper } from '../utils/http-status.class';
 
 export default async function authMiddleware(
 	req: any,
@@ -51,7 +52,9 @@ export default async function authMiddleware(
 					{ sub: decoded.sub },
 					process.env.ATOKEN_SECRET || '',
 					{
-						expiresIn: process.env.ATOKEN_VALIDITY_DURATION,
+						expiresIn: parseInt(
+							process.env.ATOKEN_VALIDITY_DURATION || '0',
+						),
 					},
 				);
 				setCookies(
@@ -76,7 +79,9 @@ export default async function authMiddleware(
 		) {
 			throw new InvalidRefreshTokenException();
 		} else {
-			res.status(HttpStatus.UNAUTHORIZED).json({ error: err.message });
+			res.status(await HttpStatusWrapper.getStatus('UNAUTHORIZED')).json({
+				error: err.message,
+			});
 		}
 	}
 }

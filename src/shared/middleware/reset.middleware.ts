@@ -3,6 +3,7 @@ import { ResetPasswordTokenNotFoundException } from '../exceptions/auth.exceptio
 import { CryptoUtil } from '../utils/crypto.utils';
 import { HttpStatus } from 'http-status-ts';
 import { NextFunction } from 'express';
+import { HttpStatusWrapper } from '../utils/http-status.class';
 
 export default async function resetMiddleware(
 	req: any,
@@ -27,14 +28,14 @@ export default async function resetMiddleware(
 		next();
 	} catch (err: any) {
 		if (err.name === 'TokenExpiredError') {
-			res.status(HttpStatus.UNAUTHORIZED).json({
+			res.status(await HttpStatusWrapper.getStatus('UNAUTHORIZED')).json({
 				error: 'Reset password token expired. Please request a new one.',
 			});
 		} else if (err.name === 'ResetPasswordTokenNotFoundException') {
-			// res.status(HttpStatus.UNAUTHORIZED).json({ error: "Reset password token not found." });
+			// res.status(await HttpStatusWrapper.getStatus('UNAUTHORIZED')).json({ error: "Reset password token not found." });
 			throw err;
 		} else {
-			res.status(HttpStatus.UNAUTHORIZED).json({
+			res.status(await HttpStatusWrapper.getStatus('UNAUTHORIZED')).json({
 				error: 'Invalid reset password token.',
 			});
 		}

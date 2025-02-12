@@ -4,6 +4,7 @@ import { LoginDTO } from './dto/login.dto';
 import { CreateUserDto } from '../user/dto/user.dto';
 import cookie from 'cookie';
 import { Request, Response } from 'express';
+import { HttpStatusWrapper } from '../../shared/utils/http-status.class';
 
 export const login = async (req: Request, res: Response) => {
 	try {
@@ -40,7 +41,9 @@ export const login = async (req: Request, res: Response) => {
 		);
 		res.setHeader('Access-Control-Allow-Credentials', 'true');
 		res.setHeader('Set-Cookie', [access_token, refresh_token]);
-		res.status(HttpStatus.OK).json({ message: 'Login successful' });
+		res.status(await HttpStatusWrapper.getStatus('OK')).json({
+			message: 'Login successful',
+		});
 	} catch (err: any) {
 		res.status(err.statusCode).json({ error: err.message });
 	}
@@ -50,7 +53,7 @@ export const register = async (req: Request, res: Response) => {
 	try {
 		const createUserDto = new CreateUserDto(req.body);
 		const newUser = await authService.register(createUserDto);
-		res.status(HttpStatus.CREATED).json({
+		res.status(await HttpStatusWrapper.getStatus('CREATED')).json({
 			message: 'User created successfully',
 			user: newUser,
 		});
@@ -62,12 +65,14 @@ export const register = async (req: Request, res: Response) => {
 export const resetPasswordRequest = async (req: Request, res: Response) => {
 	try {
 		await authService.resetPasswordRequest(req.body.email);
-		res.status(HttpStatus.OK).json({
+		res.status(await HttpStatusWrapper.getStatus('OK')).json({
 			message: 'An OTP has been sent to your email, please check',
 		});
 	} catch (err: any) {
 		console.log(err);
-		res.status(HttpStatus.BAD_REQUEST).json({ error: err.message });
+		res.status(await HttpStatusWrapper.getStatus('BAD_REQUEST')).json({
+			error: err.message,
+		});
 	}
 };
 
@@ -79,10 +84,14 @@ export const resetPasswordVerification = async (req: any, res: Response) => {
 			password,
 			userId,
 		);
-		res.status(HttpStatus.OK).json({ message: result });
+		res.status(await HttpStatusWrapper.getStatus('OK')).json({
+			message: result,
+		});
 	} catch (err: any) {
 		console.log(err);
-		res.status(HttpStatus.UNAUTHORIZED).json({ error: err.message });
+		res.status(await HttpStatusWrapper.getStatus('UNAUTHORIZED')).json({
+			error: err.message,
+		});
 	}
 };
 
@@ -98,7 +107,9 @@ export const verifyEmail = async (req: Request, res: Response) => {
 			'<script>window.close();</script><h1>Email verified successfully</h1>',
 		);
 	} catch (err: any) {
-		res.status(HttpStatus.UNAUTHORIZED).json({ error: err.message });
+		res.status(await HttpStatusWrapper.getStatus('UNAUTHORIZED')).json({
+			error: err.message,
+		});
 	}
 };
 
@@ -106,10 +117,12 @@ export const verifyOTP = async (req: Request, res: Response) => {
 	try {
 		const { otp, email } = req.body;
 		const result = await authService.verifyOTP(otp, email);
-		res.status(HttpStatus.OK).json({
+		res.status(await HttpStatusWrapper.getStatus('OK')).json({
 			message: 'OTP verified successfully',
 		});
 	} catch (err: any) {
-		res.status(HttpStatus.UNAUTHORIZED).json({ error: err.message });
+		res.status(await HttpStatusWrapper.getStatus('UNAUTHORIZED')).json({
+			error: err.message,
+		});
 	}
 };

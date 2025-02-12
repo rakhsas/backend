@@ -1,7 +1,7 @@
 import pg from 'pg';
 const { Pool } = pg;
 import 'dotenv/config';
-import { logger } from '../logger/logger';
+import logger from '../logger/logger';
 
 interface DatabaseConfig {
 	user: string;
@@ -30,18 +30,18 @@ const connectWithRetry = async (maxRetries = 5, delay = 2000) => {
 		try {
 			await (config as pg.Pool).connect();
 			// console.log('Connected to the database successfully.');
-			logger.log('Connected to the database successfully.');
+			logger.info('Connected to the database successfully.');
 			return;
 		} catch (error: any) {
-			console.error(
+			logger.error(
 				`Attempt ${attempt} - Failed to connect to the database:`,
 				error.message,
 			);
 			if (attempt === maxRetries) {
-				console.error('Max retries reached. Exiting application.');
+				logger.error('Max retries reached. Exiting application.');
 				process.exit(1); // Exit the process with failure
 			}
-			console.error(`Waiting for ${delay / 1000}s before next retry...`);
+			logger.error(`Waiting for ${delay / 1000}s before next retry...`);
 			await new Promise(res => setTimeout(res, delay));
 			delay *= 2; // Exponential backoff
 		}

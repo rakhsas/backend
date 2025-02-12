@@ -1,5 +1,4 @@
 import { repository } from '../../../repository';
-import * as bcrypt from 'bcrypt-ts';
 import { IRelations } from '../../../shared/utils/interfaces';
 
 const save = async (UserData: any) => {
@@ -32,6 +31,7 @@ const findById = async (id: string) => {
 
 const hashPassword = async (UserData: any) => {
 	try {
+		const bcrypt = await import('bcrypt-ts');
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(UserData.password, salt);
 		UserData.password = hashedPassword;
@@ -41,6 +41,7 @@ const hashPassword = async (UserData: any) => {
 
 const comparePassword = async (password: string, hashedPassword: string) => {
 	try {
+		const bcrypt = await import('bcrypt-ts');
 		return await bcrypt.compare(password, hashedPassword);
 	} catch (error) {
 		throw error;

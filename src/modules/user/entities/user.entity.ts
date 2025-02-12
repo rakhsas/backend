@@ -15,8 +15,15 @@ const columns = {
 	updated_at: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
 };
 
-let userModel = null;
-(async () => {
-	userModel = createModel({ tableName: 'users', columns, foreignKey: [] });
-	userModel.syncTable();
-})();
+const userModel = createModel({ tableName: 'users', columns, foreignKey: [] });
+
+export default {
+	syncTable: async () => {
+		try {
+			await userModel.syncTable();
+			// console.log("✅ Synced table for users");
+		} catch (err) {
+			console.error('❌ Error syncing users table:', err);
+		}
+	},
+};
