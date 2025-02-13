@@ -1,33 +1,32 @@
-// import { HttpStatus } from 'http-status-ts';
-
+// 
 export class InvalidCredentialsException extends Error {
-	// statusCode: HttpStatus = HttpStatus.UNAUTHORIZED;
-	status: number;
+	// statusCodeCode: HttpstatusCode = HttpstatusCode.UNAUTHORIZED;
+	statusCode: number;
 	constructor(
 		message = 'Invalid credentials. Check your email and try again.',
 	) {
 		super(message);
 		this.name = this.constructor.name;
-		this.status = 401;
+		this.statusCode = 401;
 	}
 }
 
 export class UserAlreadyExistsException extends Error {
-	// statusCode: HttpStatus = HttpStatus.CONFLICT;
-	status: number;
+	// statusCodeCode: HttpstatusCode = HttpstatusCode.CONFLICT;
+	statusCode: number;
 	constructor(message = 'User already exists.') {
 		super(message);
 		this.name = this.constructor.name;
-		this.status = 409;
+		this.statusCode = 409;
 	}
 }
 
 export class UserNotFoundException extends Error {
-	// statusCode: HttpStatus = HttpStatus.NOT_FOUND;
-	status: number;
+	// statusCodeCode: HttpstatusCode = HttpstatusCode.NOT_FOUND;
+	statusCode: number;
 	constructor(message = 'Please Log in again.') {
 		super(message);
 		this.name = this.constructor.name;
-		this.status = 404;
+		this.statusCode = 404;
 	}
 }

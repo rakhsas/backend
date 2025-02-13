@@ -35,7 +35,6 @@ const update = async (
 		const query = `UPDATE ${tableName} SET ${setClause} WHERE ${conditionClause} AND ${differentClause}`;
 		// Combine values from data and condition for the query
 		const combinedValues = [...values, ...conditionValues];
-		console.log(query, combinedValues);
 		const result = await (pool as pg.Pool).query(query, combinedValues);
 
 		if (result.rowCount === 0) {
@@ -45,7 +44,7 @@ const update = async (
 			);
 			return false;
 		}
-		logger.info(`Record updated in ${tableName} table.`);
+		// logger.info(`Record updated in ${tableName} table.`);
 		return result.rowCount !== null && result.rowCount > 0;
 	} catch (error) {
 		console.error(`Error updating record in ${tableName}:`, error);

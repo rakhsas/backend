@@ -7,11 +7,14 @@ import path from 'path';
 import express from 'express';
 import routes from './shared/routes';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
+
 
 async function bootstrap() {
 	try {
 		const app = express();
 		app.use(express.json());
+		app.use(cookieParser());
 		dotenv.config();
 
 		logger.info('Starting application...');

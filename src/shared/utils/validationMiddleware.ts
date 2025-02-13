@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z, ZodError } from 'zod';
 
-import { HttpStatusWrapper } from './http-status.class';
+import HttpStatus from 'http-status';
 
 export function validateData(schema: z.ZodObject<any, any>) {
 	return async (req: Request, res: Response, next: NextFunction) => {
@@ -15,14 +15,14 @@ export function validateData(schema: z.ZodObject<any, any>) {
 					' ' +
 					error.errors[0].message;
 				res.status(
-					await HttpStatusWrapper.getStatus('BAD_REQUEST'),
+					HttpStatus.BAD_REQUEST,
 				).json({
 					error: 'Invalid data',
 					details: errorMsg,
 				});
 			} else {
 				res.status(
-					await HttpStatusWrapper.getStatus('INTERNAL_SERVER_ERROR'),
+					HttpStatus.INTERNAL_SERVER_ERROR
 				).json({
 					error: 'Internal Server Error',
 				});

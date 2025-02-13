@@ -7,10 +7,9 @@ import {
 	AccessTokenNotFoundException,
 	InvalidRefreshTokenException,
 } from '../exceptions/auth.exception';
-// import { HttpStatus } from 'http-status-ts';
-import { NextFunction } from 'express';
-import { Response } from 'express';
-import { HttpStatusWrapper } from '../utils/http-status.class';
+// import { NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
+import HttpStatus from 'http-status';
 
 export default async function authMiddleware(
 	req: any,
@@ -79,7 +78,7 @@ export default async function authMiddleware(
 		) {
 			throw new InvalidRefreshTokenException();
 		} else {
-			res.status(await HttpStatusWrapper.getStatus('UNAUTHORIZED')).json({
+			res.status(HttpStatus.UNAUTHORIZED).json({
 				error: err.message,
 			});
 		}
