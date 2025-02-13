@@ -1,25 +1,24 @@
 import jwt from 'jsonwebtoken';
 import { ResetPasswordTokenNotFoundException } from '../exceptions/auth.exception';
 import { CryptoUtil } from '../utils/crypto.utils';
-import { HttpStatus } from 'http-status-ts';
 import { NextFunction } from 'express';
-import { HttpStatusWrapper } from '../utils/http-status.class';
+import HttpStatus from 'http-status';
 
 export default async function resetMiddleware(
 	req: any,
 	res: any,
 	next: NextFunction,
 ) {
-	const csfParam = req.query.csf;
+	const cookies = req.cookies;
+	const { csfParam } = cookies;
 	try {
 		if (!csfParam) {
 			throw new ResetPasswordTokenNotFoundException();
 		}
-		if (!process.env.ATOKEN_SECRET) {
-			throw new Error('ATOKEN_SECRET is not defined');
+		if (!process.env.RTOKEN_SECRET) {
+			throw new Error('RTOKEN_SECRET is not defined');
 		}
-		const decoded = jwt.verify(csfParam, process.env.ATOKEN_SECRET || '');
-		console.log(decoded.sub, ': sub');
+		const decoded = jwt.verify(csfParam, process.env.RTOKEN_SECRET || '');
 		const decryptedSub = CryptoUtil.decrypt(
 			decoded.sub,
 			process.env.PAYLOAD_ENCRYPTION_KEY || '',
@@ -28,14 +27,13 @@ export default async function resetMiddleware(
 		next();
 	} catch (err: any) {
 		if (err.name === 'TokenExpiredError') {
-			res.status(await HttpStatusWrapper.getStatus('UNAUTHORIZED')).json({
+			res.status(HttpStatus.UNAUTHORIZED).json({
 				error: 'Reset password token expired. Please request a new one.',
 			});
 		} else if (err.name === 'ResetPasswordTokenNotFoundException') {
-			// res.status(await HttpStatusWrapper.getStatus('UNAUTHORIZED')).json({ error: "Reset password token not found." });
-			throw err;
+			res.status(HttpStatus.UNAUTHORIZED).json({ error: "Reset password token not found." });
 		} else {
-			res.status(await HttpStatusWrapper.getStatus('UNAUTHORIZED')).json({
+			res.status(HttpStatus.UNAUTHORIZED).json({
 				error: 'Invalid reset password token.',
 			});
 		}

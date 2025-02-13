@@ -3,7 +3,7 @@ import {
 	InvalidCredentialsException,
 	UserAlreadyExistsException,
 } from '../../../shared/exceptions/user.exception';
-import { PasswordMismatchException } from '../../../shared/exceptions/auth.exception';
+import { PasswordMatchException, PasswordMismatchException } from '../../../shared/exceptions/auth.exception';
 import jwt from 'jsonwebtoken';
 import { CryptoUtil } from '../../../shared/utils/crypto.utils';
 import nodemailer from 'nodemailer';
@@ -15,6 +15,7 @@ import { LoginDTO } from '../dto/login.dto';
 import { CreateUserDto } from '../../user/dto/user.dto';
 import { AccountNotVerifiedException } from '../../../shared/exceptions/account.exception';
 import * as otpService from './otp.service';
+import { RepositoryExceptionUpdate } from '../../../shared/exceptions/repository.exception';
 
 export const login = async (loginDTO: LoginDTO) => {
 	try {
@@ -32,7 +33,7 @@ export const login = async (loginDTO: LoginDTO) => {
 		}
 		const { aToken, rToken } = await generateTokens(user);
 		const result = await userService.update({ rToken }, { id: user.id });
-		if (!result) throw new Error('Error updating refresh token');
+		if (!result) throw new RepositoryExceptionUpdate();
 		return { aToken, rToken };
 	} catch (err) {
 		throw err;
@@ -48,10 +49,10 @@ export const generateTokens = async (user: any) => {
 			),
 		};
 		const aToken = jwt.sign(payload, process.env.ATOKEN_SECRET || '', {
-			expiresIn: parseInt(process.env.ATOKEN_VALIDITY_DURATION || '0'),
+			expiresIn: (process.env.ATOKEN_VALIDITY_DURATION as StringValue),
 		});
 		const rToken = jwt.sign(payload, process.env.RTOKEN_SECRET || '', {
-			expiresIn: parseInt(process.env.RTOKEN_VALIDITY_DURATION || '0'),
+			expiresIn: (process.env.RTOKEN_VALIDITY_DURATION as StringValue),
 		});
 		return {
 			aToken,
@@ -67,7 +68,6 @@ export const register = async (registerDTO: CreateUserDto) => {
 	try {
 		const user = await userService.findByEmail(registerDTO.email);
 		if (user) throw new UserAlreadyExistsException();
-
 		const createdUser: CreateUserDto = await userService.save(registerDTO);
 		accountVerification(createdUser.email);
 		return createdUser;
@@ -98,9 +98,7 @@ export const generateVerificationLink = (email: string) => {
 			payload,
 			process.env.VTOKEN_SECRET || '',
 			{
-				expiresIn: parseInt(
-					process.env.VERIFICATION_TOKEN_DURATION || '0',
-				),
+				expiresIn: (process.env.VERIFICATION_TOKEN_DURATION as StringValue),
 			},
 		);
 		return `${process.env.CLIENT_URL}/api/authenticate/verify?csf=${verificationToken}`;
@@ -149,8 +147,17 @@ export const resetPasswordVerification = async (
 	userId: string,
 ) => {
 	try {
+		const user = await userService.findById(userId);
+		if (!user) throw new InvalidCredentialsException();
+
+		const isMatch = await userService.comparePassword(
+			password,
+			user.password
+		);
+		if (isMatch) throw new PasswordMatchException();
+		const hashedPassword = await userService.hashPassword(password);
 		const result = await userService.update(
-			{ password: password },
+			{ password: hashedPassword },
 			{ id: userId },
 		);
 		return result
@@ -207,14 +214,64 @@ export async function verifyEmail(token: string): Promise<boolean> {
 	}
 }
 
-export async function verifyOTP(otp: string, email: string): Promise<boolean> {
+export async function verifyOTP(otp: string, email: string): Promise<string> {
 	try {
 		const user = await userService.findByEmail(email);
 		if (!user) throw new InvalidCredentialsException();
 
 		const result = await otpService.verifyOTP(user, otp);
-		return result;
+		const payload = {
+			sub: CryptoUtil.encrypt(user.id, process.env.PAYLOAD_ENCRYPTION_KEY || ''),
+		}
+		const resetToken = generateSingleUseToken(payload, process.env.RTOKEN_SECRET || '', (process.env.RTOKEN_VALIDITY_DURATION as StringValue));
+
+		return resetToken;
 	} catch (err) {
 		throw err;
 	}
+}
+type Unit =
+| "Years"
+| "Year"
+| "Yrs"
+| "Yr"
+| "Y"
+| "Weeks"
+| "Week"
+| "W"
+| "Days"
+| "Day"
+| "D"
+| "Hours"
+| "Hour"
+| "Hrs"
+| "Hr"
+| "H"
+| "Minutes"
+| "Minute"
+| "Mins"
+| "Min"
+| "M"
+| "Seconds"
+| "Second"
+| "Secs"
+| "Sec"
+| "s"
+| "Milliseconds"
+| "Millisecond"
+| "Msecs"
+| "Msec"
+| "Ms";
+
+type UnitAnyCase = Unit | Uppercase<Unit> | Lowercase<Unit>;
+
+type StringValue =
+| `${number}`
+| `${number}${UnitAnyCase}`
+| `${number} ${UnitAnyCase}`;
+
+export const generateSingleUseToken = (payload: any, secret: string, duration: StringValue) => {
+	return jwt.sign(payload, secret, {
+		expiresIn: duration,
+	});
 }

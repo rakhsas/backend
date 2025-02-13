@@ -1,19 +1,21 @@
-// import { HttpStatus } from 'http-status-ts';
 import * as profileService from '../services/profile.service';
 import { ProfileDto } from '../dto/profile.dto';
 import { Response } from 'express';
-import { HttpStatusWrapper } from '../../../shared/utils/http-status.class';
+import HttpStatus from 'http-status';
+
 
 export const saveProfile = async (req: any, res: Response) => {
 	try {
 		req.body.user_id = req.userId;
 		const newUser = await profileService.save(req.body as ProfileDto);
-		res.status(await HttpStatusWrapper.getStatus('CREATED')).json({
+		res.status(
+			HttpStatus.CREATED
+		).json({
 			message: 'Profile created successfully',
 			user: newUser,
 		});
 	} catch (err: any) {
-		res.status(await HttpStatusWrapper.getStatus('BAD_REQUEST')).json({
+		res.status(HttpStatus.BAD_REQUEST).json({
 			error: err.message,
 		});
 	}
@@ -22,9 +24,13 @@ export const saveProfile = async (req: any, res: Response) => {
 export const getProfile = async (req: any, res: Response) => {
 	try {
 		const profile = await profileService.get(req.userId);
-		res.status(await HttpStatusWrapper.getStatus('OK')).json(profile);
+		res.status(
+			HttpStatus.OK
+		).json(profile);
 	} catch (err: any) {
-		res.status(await HttpStatusWrapper.getStatus('BAD_REQUEST')).json({
+		res.status(
+			HttpStatus.BAD_REQUEST
+		).json({
 			error: err.message,
 		});
 	}
@@ -36,11 +42,15 @@ export const updateProfile = async (req: any, res: Response) => {
 		const updatedProfile = await profileService.update(
 			req.body as ProfileDto,
 		);
-		res.status(await HttpStatusWrapper.getStatus('OK')).json(
+		res.status(
+			HttpStatus.OK
+		).json(
 			updatedProfile,
 		);
 	} catch (err: any) {
-		res.status(await HttpStatusWrapper.getStatus('BAD_REQUEST')).json({
+		res.status(
+			HttpStatus.BAD_REQUEST
+		).json({
 			error: err.message,
 		});
 	}

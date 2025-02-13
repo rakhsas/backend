@@ -1,9 +1,15 @@
+import logger from '../../../core/logger/logger';
 import { repository } from '../../../repository';
 import { IRelations } from '../../../shared/utils/interfaces';
+import bcrypt from 'bcrypt';
 
 const save = async (UserData: any) => {
 	try {
-		const userData = await hashPassword(UserData);
+		const hashedPassword = await hashPassword(UserData.password);
+		const userData = {
+			...UserData,
+			password: hashedPassword,
+		};
 		const newUser = await repository.save('users', userData);
 		return newUser;
 	} catch (error) {
@@ -29,19 +35,18 @@ const findById = async (id: string) => {
 	}
 };
 
-const hashPassword = async (UserData: any) => {
+const hashPassword = async (password: any) => {
 	try {
-		const bcrypt = await import('bcrypt-ts');
 		const salt = await bcrypt.genSalt(10);
-		const hashedPassword = await bcrypt.hash(UserData.password, salt);
-		UserData.password = hashedPassword;
-		return UserData;
-	} catch (error) {}
+		const hashedPassword = await bcrypt.hash(password, salt);
+		return hashedPassword;
+	} catch (error) {
+		console.log(error);
+	}
 };
 
 const comparePassword = async (password: string, hashedPassword: string) => {
 	try {
-		const bcrypt = await import('bcrypt-ts');
 		return await bcrypt.compare(password, hashedPassword);
 	} catch (error) {
 		throw error;
@@ -78,4 +83,5 @@ export {
 	findById,
 	update,
 	getAllUsersWithRelations,
+	hashPassword
 };
