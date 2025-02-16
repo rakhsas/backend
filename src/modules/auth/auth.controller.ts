@@ -4,7 +4,11 @@ import { CreateUserDto } from '../user/dto/user.dto';
 import * as cookie from 'cookie';
 import { Request, Response } from 'express';
 import HttpStatus from 'http-status';
+// import { Request, Response } from 'express';
+import axios from 'axios';
 
+import { OAuth2Client } from 'google-auth-library';
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 export const login = async (req: Request, res: Response) => {
 	try {
 		const loginDTO = new LoginDTO(req.body);
@@ -127,6 +131,7 @@ export const verifyEmail = async (req: Request, res: Response) => {
 	}
 };
 
+
 export const verifyOTP = async (req: Request, res: Response) => {
 	try {
 		const { otp, email } = req.body;
@@ -151,3 +156,5 @@ export const verifyOTP = async (req: Request, res: Response) => {
 		});
 	}
 };
+
+
