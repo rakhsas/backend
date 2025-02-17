@@ -3,6 +3,7 @@ import {
 	login,
 	register,
 	verifyEmail,
+    googleAuthentication
 } from '../../modules/auth/auth.controller';
 import { validateData } from '../utils/validationMiddleware';
 import {
@@ -31,19 +32,7 @@ router.get(
 		googleAuth,
         passport.authenticate('google', { failureRedirect: '/' }),
             (req, res) => {
-                const userData = req.user as any;
-                console.log('req Cookies -> ', req.cookies);
-                const firstLogin = req.cookies.firstLogin;
-                const access_token = req.cookies.access_token;
-                const refreshToken = req.cookies.refreshToken;
-                res.cookie('firstLogin', firstLogin);
-                res.cookie('access_token', access_token);
-                res.cookie('refreshToken', refreshToken);
-                if (!userData || !userData.token) {
-                    return res.redirect('http://localhost:3000/login?error=NoToken');
-                }
-                // console.log(res.cookie);
-                return res.send('<html><body>IT\'s working</body></html>')
+                googleAuthentication(req, res);
             }
 );
 
