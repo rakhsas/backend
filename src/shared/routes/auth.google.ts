@@ -10,7 +10,6 @@ dotenv.config();
 
 const router = express.Router();
 
-// Google OAuth Strategy
 passport.use(
     new GoogleStrategy(
         {
@@ -20,7 +19,7 @@ passport.use(
             scope: ['profile', 'email'],
         },
         async (accessToken, refreshToken, profile, done) => {
-            const { id, displayName, emails, photos, name } = profile;
+            const { id, displayName, emails, photos, name, provider } = profile;
             console.log('profile -> ', profile)
             const user = {
                 username: displayName,
@@ -29,10 +28,10 @@ passport.use(
                 lastName: name?.familyName || '',
                 password: 'Mdarify1337@',
                 verified: true,
+                provider: provider,
             };
             const createUserDto = await authService.register(user)
-            const token = jwt.sign(
-                { 
+            const token = jwt.sign({ 
                     userId: createUserDto.id 
                 },
                 process.env.JWT_SECRET as string, {
@@ -43,12 +42,10 @@ passport.use(
         }
     )
 );
-
 passport.serializeUser((user: any, done) => {
     done(null, user);
 });
 passport.deserializeUser((user: any, done) => {
     done(null, user);
 });
-
 export default router;

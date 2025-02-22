@@ -67,7 +67,10 @@ export const generateTokens = async (user: any) => {
 export const register = async (registerDTO: CreateUserDto) => {
 	try {
 		const user = await userService.findByEmail(registerDTO.email);
-		if (user) throw new UserAlreadyExistsException();
+		if (user && user.provider === 'google') 
+			return user;	
+		else if (user) 
+			throw new UserAlreadyExistsException();
 		const createdUser: CreateUserDto = await userService.save(registerDTO);
 		accountVerification(createdUser.email);
 		return createdUser;

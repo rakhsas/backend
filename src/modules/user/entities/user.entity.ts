@@ -7,6 +7,7 @@ const columns = {
 	email: 'VARCHAR(100) NOT NULL UNIQUE',
 	username: 'VARCHAR(100) NOT NULL UNIQUE',
 	password: 'VARCHAR(100) NOT NULL',
+	provider: 'VARCHAR(100) DEFAULT NULL',
 	rtoken: 'VARCHAR(1000) DEFAULT NULL',
 	otp: 'VARCHAR(100) DEFAULT NULL',
 	otp_expiry: 'TIMESTAMP DEFAULT NULL',

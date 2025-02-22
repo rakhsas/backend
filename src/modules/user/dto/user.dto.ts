@@ -7,8 +7,7 @@ export class CreateUserDto {
 	username: string;
 	verified: boolean;
 	password: string;
-	picture?: string;
-
+	provider?: string;
 	constructor(body: any) {
 		this.firstName = body.firstName;
 		this.lastName = body.lastName;
