@@ -8,6 +8,8 @@ import express from 'express';
 import routes from './shared/routes';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import passport from 'passport';
+import session from 'express-session';
 
 
 async function bootstrap() {
@@ -15,6 +17,15 @@ async function bootstrap() {
 		const app = express();
 		app.use(express.json());
 		app.use(cookieParser());
+		app.use(
+			session({
+			  secret: process.env.JWT_SECRET as string,
+			  resave: false,
+			  saveUninitialized: false,
+			})
+		  );
+		  app.use(passport.initialize());
+		  app.use(passport.session());
 		dotenv.config();
 
 		logger.info('Starting application...');

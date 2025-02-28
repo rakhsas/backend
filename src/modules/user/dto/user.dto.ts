@@ -1,12 +1,13 @@
 // src/dtos/userDto.js
 export class CreateUserDto {
+	id?: string;
 	firstName: string;
 	lastName: string;
 	email: string;
 	username: string;
-	password: string;
 	verified: boolean;
-
+	password: string | null;
+	provider?: string;
 	constructor(body: any) {
 		this.firstName = body.firstName;
 		this.lastName = body.lastName;
@@ -14,6 +15,7 @@ export class CreateUserDto {
 		this.username = body.username;
 		this.password = body.password;
 		this.verified = body.verified || false;
+		this.provider = body.provider;
 	}
 }
 

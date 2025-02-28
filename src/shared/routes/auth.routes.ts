@@ -1,20 +1,25 @@
 import express from 'express';
 import {
-	login,
-	register,
-	resetPasswordVerification,
-	verifyEmail,
+    login,
+    register,
+    verifyEmail,
+    googleAuthentication
 } from '../../modules/auth/auth.controller';
 import { validateData } from '../utils/validationMiddleware';
 import {
-	loginSchema,
-	resetPasswordSchema,
+    loginSchema,
 } from '../../modules/auth/auth.validation';
-import resetMiddleware from '../middleware/reset.middleware';
 import { userRegistrationSchema } from '../../modules/user/user.validation';
+import authGoogle from './auth.google';
+import passport from 'passport';
 
 const router = express.Router();
 router.post('/register', validateData(userRegistrationSchema), register);
 router.post('/login', validateData(loginSchema), login);
 router.get('/verify', verifyEmail);
+// Google authentication routes
+router.get('/google', authGoogle, passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google/callback', authGoogle, passport.authenticate('google', { failureRedirect: '/' }), googleAuthentication);
+
+
 export default router;
