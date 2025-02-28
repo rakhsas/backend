@@ -1,18 +1,23 @@
-import logger from '../../../core/logger/logger';
 import { repository } from '../../../repository';
 import { IRelations } from '../../../shared/utils/interfaces';
 import bcrypt from 'bcrypt';
+import { CreateUserDto } from '../dto/user.dto';
 
-const save = async (UserData: any) => {
+const save = async (userData: CreateUserDto) => {
 	try {
-		const hashedPassword = await hashPassword(UserData.password);
-		const userData = {
-			...UserData,
-			password: hashedPassword,
-		};
-		const newUser = await repository.save('users', userData);
+		// Create a copy of the user data to avoid mutating the original object
+		const userDataCopy = { ...userData };
+
+		// Hash the password if it exists
+		if (userDataCopy.password) {
+			userDataCopy.password = await hashPassword(userDataCopy.password);
+		}
+
+		// Save the user data to the repository
+		const newUser = await repository.save('users', userDataCopy);
 		return newUser;
 	} catch (error) {
+		// Re-throw the error for the caller to handle
 		throw error;
 	}
 };
@@ -42,6 +47,7 @@ const hashPassword = async (password: any) => {
 		return hashedPassword;
 	} catch (error) {
 		console.log(error);
+		return null;
 	}
 };
 

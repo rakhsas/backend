@@ -66,17 +66,25 @@ export const generateTokens = async (user: any) => {
 
 export const register = async (registerDTO: CreateUserDto) => {
 	try {
-		const user = await userService.findByEmail(registerDTO.email);
-		if (user && user.provider === 'google') 
-			return user;	
-		else if (user) 
-			throw new UserAlreadyExistsException();
-		const createdUser: CreateUserDto = await userService.save(registerDTO);
-		accountVerification(createdUser.email);
-		return createdUser;
-	} catch (err) {
-		throw err;
-	}
+        const user = await userService.findByEmail(registerDTO.email);
+        
+        if (user) throw new UserAlreadyExistsException();
+
+        // Ensure password is null for Google users
+        if (registerDTO.provider === 'google') {
+            registerDTO.password = null;
+            registerDTO.verified = true;
+        }
+
+        const createdUser = await userService.save(registerDTO);
+
+        // Send verification email ONLY for manual signups
+        if (!registerDTO.provider) accountVerification(createdUser.email);
+
+        return createdUser;
+    } catch (err) {
+        throw err;
+    }
 };
 
 export const accountVerification = async (email: string) => {

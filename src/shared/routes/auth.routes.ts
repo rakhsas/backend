@@ -17,23 +17,9 @@ const router = express.Router();
 router.post('/register', validateData(userRegistrationSchema), register);
 router.post('/login', validateData(loginSchema), login);
 router.get('/verify', verifyEmail);
-const googleAuth = authGoogle;
-router.get(
-    '/google',
-    googleAuth,
-    passport.authenticate('google',{
-            scope:
-                ['profile', 'email']
-        }
-    ));
-router.get(
-    '/google/callback',
-    googleAuth,
-    passport.authenticate('google',
-        { failureRedirect: '/' }),
-    (req, res) => {
-        googleAuthentication(req, res);
-    }
-);
+// Google authentication routes
+router.get('/google', authGoogle, passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google/callback', authGoogle, passport.authenticate('google', { failureRedirect: '/' }), googleAuthentication);
+
 
 export default router;

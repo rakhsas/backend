@@ -4,52 +4,48 @@ import { CreateUserDto } from '../user/dto/user.dto';
 import * as cookie from 'cookie';
 import { Request, Response } from 'express';
 import HttpStatus from 'http-status';
-// import { Request, Response } from 'express';
-import axios from 'axios';
 
-import { OAuth2Client } from 'google-auth-library';
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const setAuthCookies = (res: Response, aToken: string, rToken: string) => {
+	const accessTokenCookie = cookie.serialize('aToken', aToken, {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === 'production',
+		path: '/',
+		sameSite: 'strict',
+		maxAge: parseInt(process.env.ATOKEN_VALIDITY_DURATION_IN_SECONDS || '10') * 1000,
+	});
+
+	const refreshTokenCookie = cookie.serialize('rToken', rToken, {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === 'production',
+		path: '/',
+		sameSite: 'strict',
+		maxAge: parseInt(process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10') * 1000,
+	});
+
+	res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
+};
+
+// Helper function to set CORS headers
+const setCorsHeaders = (res: Response) => {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+	res.setHeader('Access-Control-Allow-Credentials', 'true');
+};
+
+// Login controller
 export const login = async (req: Request, res: Response) => {
 	try {
 		const loginDTO = new LoginDTO(req.body);
 		const { aToken, rToken } = await authService.login(loginDTO);
-		const access_token = cookie.serialize('aToken', aToken, {
-			httpOnly: true,
-			secure: process.env.NODE_ENV === 'production',
-			path: '/',
-			sameSite: 'strict',
-			maxAge:
-				parseInt(
-					process.env.ATOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
-				) * 1000,
-		});
-		const refresh_token = cookie.serialize('rToken', rToken, {
-			httpOnly: true,
-			secure: process.env.NODE_ENV === 'production',
-			path: '/',
-			sameSite: 'strict',
-			maxAge:
-				parseInt(
-					process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
-				) * 1000,
-		});
-		res.setHeader('Access-Control-Allow-Origin', '*');
-		res.setHeader(
-			'Access-Control-Allow-Methods',
-			'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-		);
-		res.setHeader(
-			'Access-Control-Allow-Headers',
-			'X-Requested-With,content-type',
-		);
-		res.setHeader('Access-Control-Allow-Credentials', 'true');
-		res.setHeader('Set-Cookie', [access_token, refresh_token]);
-		res.status(HttpStatus.OK).json({
-			message: 'Login successful',
-		});
+
+		setCorsHeaders(res);
+		setAuthCookies(res, aToken, rToken);
+
+		res.status(HttpStatus.OK).json({ message: 'Login successful' });
 	} catch (err: any) {
-		console.log(err);
-		res.status(err.statusCode).json({ error: err.message });
+		console.error('Login error:', err);
+		res.status(err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR).json({ error: err.message });
 	}
 };
 
@@ -142,9 +138,9 @@ export const verifyOTP = async (req: Request, res: Response) => {
 			path: '/',
 			sameSite: 'strict',
 			maxAge:
-				parseInt(
-					process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
-				) * 1000,
+			parseInt(
+				process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
+			) * 1000,
 		});
 		res.setHeader('Set-Cookie', [resetCookie]);
 		res.status(HttpStatus.OK).json({
@@ -157,19 +153,17 @@ export const verifyOTP = async (req: Request, res: Response) => {
 	}
 };
 
-export const googleAuthentication =
-	async (
-		req: Request, res: Response
-	) => {
-		const userData = req.user as any;
-		console.log('req Cookies -> ', req.cookies);
-		const firstLogin = req.cookies.firstLogin;
-		const access_token = req.cookies.access_token;
-		const refreshToken = req.cookies.refreshToken;
-		res.cookie('firstLogin', firstLogin);
-		res.cookie('access_token', access_token);
-		res.cookie('refreshToken', refreshToken);
-		if (!userData || !userData.token)
-			return res.redirect('http://localhost:3000/login?error=NoToken');
-		return res.send('<html><body>IT\'s working</body></html>')
+// Google authentication controller
+export const googleAuthentication = async (req: Request, res: Response) => {
+	const data = req.user as any;
+	const clientUrl = process.env.CLIENT_URL || '';
+
+	if (!data.user || !data.aToken || !data.rToken) {
+		return res.redirect(`${clientUrl}/login?error=GoogleLoginFailed`);
 	}
+
+	setCorsHeaders(res);
+	setAuthCookies(res, data.aToken, data.rToken);
+
+	return res.redirect(`${clientUrl}/dashboard`);
+};
