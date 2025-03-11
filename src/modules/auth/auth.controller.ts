@@ -27,7 +27,7 @@ const setAuthCookies = (res: Response, aToken: string, rToken: string) => {
 
 // Helper function to set CORS headers
 const setCorsHeaders = (res: Response) => {
-	res.setHeader('Access-Control-Allow-Origin', '*');
+	res.setHeader('Access-Control-Allow-Origin', res.req.headers.origin || '');
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
 	res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -167,3 +167,13 @@ export const googleAuthentication = async (req: Request, res: Response) => {
 
 	return res.redirect(`${clientUrl}/dashboard`);
 };
+
+// export const tokenInfo = async (req: Request, res: Response) => {
+// 	try {
+// 		const { aToken, rToken } = req.cookies;
+// 		const tokenInfo = await authService.tokenInfo(aToken, rToken);
+// 		res.status(HttpStatus.OK).json(tokenInfo);
+// 	} catch (err: any) {
+// 		res.status(HttpStatus.UNAUTHORIZED).json({ error: err.message });
+// 	}
+// }
