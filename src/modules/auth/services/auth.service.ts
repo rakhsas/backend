@@ -286,3 +286,24 @@ export const generateSingleUseToken = (payload: any, secret: string, duration: S
 		expiresIn: duration,
 	});
 }
+
+// export const tokenInfo = async (aToken: string, rToken: string) => {
+// 	try {
+// 		const aTokenPayload = jwt.verify(
+// 			aToken,
+// 			process.env.ATOKEN_SECRET ||
+// 				'',
+// 		) as any;
+// 		const rTokenPayload = jwt.verify(
+// 			rToken,
+// 			process.env.RTOKEN_SECRET ||
+// 				'',
+// 		) as any;
+// 		return {
+// 			aTokenPayload,
+// 			rTokenPayload,
+// 		};
+// 	} catch (err) {
+// 		throw err;
+// 	}
+// }

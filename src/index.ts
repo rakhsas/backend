@@ -3,20 +3,26 @@ import logger from './core/logger/logger';
 import { connectWithRetry } from './core/dbconfig/config';
 import './core/logger/file-watcher';
 import loadEntities from './core/dbconfig/load';
-import path from 'path';
 import express from 'express';
 import routes from './shared/routes';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import session from 'express-session';
-
+import cors from 'cors'
 
 async function bootstrap() {
 	try {
 		const app = express();
 		app.use(express.json());
 		app.use(cookieParser());
+		// cors
+		app.use(
+			cors({
+				origin: 'http://localhost:4200',
+				credentials: true,
+			})
+		);
 		app.use(
 			session({
 			  secret: process.env.JWT_SECRET as string,

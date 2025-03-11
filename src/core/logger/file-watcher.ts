@@ -12,9 +12,9 @@ watcher.on('change', (path: string) => {
 	logger.info(`File changed: ${path}`);
 });
 
-watcher.on('add', (path: string) => {
-	logger.info(`File added: ${path}`);
-});
+// watcher.on('add', (path: string) => {
+// 	logger.info(`File added: ${path}`);
+// });
 
 watcher.on('unlink', (path: string) => {
 	logger.info(`File removed: ${path}`);
