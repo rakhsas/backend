@@ -16,9 +16,7 @@ export const remove = async (req: any, res: Response) => {
 	try {
 		req.body.liked_id = req.userId;
 		await likeService.remove(req.body);
-		res.status(HttpStatus.OK).json(
-			'Like removed',
-		);
+		res.status(HttpStatus.OK).json('Like removed');
 	} catch (err: any) {
 		res.status(HttpStatus.NOT_FOUND).json({
 			error: err.message,

@@ -89,5 +89,5 @@ export {
 	findById,
 	update,
 	getAllUsersWithRelations,
-	hashPassword
+	hashPassword,
 };

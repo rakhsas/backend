@@ -9,7 +9,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import session from 'express-session';
-import cors from 'cors'
+import cors from 'cors';
 
 async function bootstrap() {
 	try {
@@ -25,13 +25,13 @@ async function bootstrap() {
 		);
 		app.use(
 			session({
-			  secret: process.env.JWT_SECRET as string,
-			  resave: false,
-			  saveUninitialized: false,
+				secret: process.env.JWT_SECRET as string,
+				resave: false,
+				saveUninitialized: false,
 			})
-		  );
-		  app.use(passport.initialize());
-		  app.use(passport.session());
+		);
+		app.use(passport.initialize());
+		app.use(passport.session());
 		dotenv.config();
 
 		logger.info('Starting application...');

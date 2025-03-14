@@ -31,7 +31,9 @@ export default async function resetMiddleware(
 				error: 'Reset password token expired. Please request a new one.',
 			});
 		} else if (err.name === 'ResetPasswordTokenNotFoundException') {
-			res.status(HttpStatus.UNAUTHORIZED).json({ error: "Reset password token not found." });
+			res.status(HttpStatus.UNAUTHORIZED).json({
+				error: 'Reset password token not found.',
+			});
 		} else {
 			res.status(HttpStatus.UNAUTHORIZED).json({
 				error: 'Invalid reset password token.',

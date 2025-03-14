@@ -1,4 +1,4 @@
-// 
+//
 export class InvalidCredentialsException extends Error {
 	// statusCodeCode: HttpstatusCode = HttpstatusCode.UNAUTHORIZED;
 	statusCode: number;
@@ -7,7 +7,7 @@ export class InvalidCredentialsException extends Error {
 	) {
 		super(message);
 		this.name = this.constructor.name;
-		this.statusCode = 401;
+		this.statusCode = 404;
 	}
 }
 

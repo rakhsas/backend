@@ -1,6 +1,6 @@
 // throwable exception for authentication errors with 409 statusCode code
 
-// 
+//
 export interface Error {
 	name: string;
 	message: string;
@@ -40,7 +40,7 @@ export class PasswordMatchException extends Error {
 	) {
 		super(message);
 		this.name = this.constructor.name;
-		this.statusCode = 401;
+		this.statusCode = 400;
 	}
 }
 

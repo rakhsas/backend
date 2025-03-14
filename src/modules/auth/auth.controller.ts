@@ -11,7 +11,9 @@ const setAuthCookies = (res: Response, aToken: string, rToken: string) => {
 		secure: process.env.NODE_ENV === 'production',
 		path: '/',
 		sameSite: 'strict',
-		maxAge: parseInt(process.env.ATOKEN_VALIDITY_DURATION_IN_SECONDS || '10') * 1000,
+		maxAge:
+			parseInt(process.env.ATOKEN_VALIDITY_DURATION_IN_SECONDS || '10') *
+			1000,
 	});
 
 	const refreshTokenCookie = cookie.serialize('rToken', rToken, {
@@ -19,7 +21,9 @@ const setAuthCookies = (res: Response, aToken: string, rToken: string) => {
 		secure: process.env.NODE_ENV === 'production',
 		path: '/',
 		sameSite: 'strict',
-		maxAge: parseInt(process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10') * 1000,
+		maxAge:
+			parseInt(process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10') *
+			1000,
 	});
 
 	res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
@@ -28,8 +32,14 @@ const setAuthCookies = (res: Response, aToken: string, rToken: string) => {
 // Helper function to set CORS headers
 const setCorsHeaders = (res: Response) => {
 	res.setHeader('Access-Control-Allow-Origin', res.req.headers.origin || '');
-	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+	res.setHeader(
+		'Access-Control-Allow-Methods',
+		'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+	);
+	res.setHeader(
+		'Access-Control-Allow-Headers',
+		'X-Requested-With,content-type',
+	);
 	res.setHeader('Access-Control-Allow-Credentials', 'true');
 };
 
@@ -45,7 +55,9 @@ export const login = async (req: Request, res: Response) => {
 		res.status(HttpStatus.OK).json({ message: 'Login successful' });
 	} catch (err: any) {
 		console.error('Login error:', err);
-		res.status(err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR).json({ error: err.message });
+		res.status(err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR).json({
+			error: err.message,
+		});
 	}
 };
 
@@ -53,9 +65,7 @@ export const register = async (req: Request, res: Response) => {
 	try {
 		const createUserDto = new CreateUserDto(req.body);
 		const newUser = await authService.register(createUserDto);
-		res.status(
-			HttpStatus.CREATED
-		).json({
+		res.status(HttpStatus.CREATED).json({
 			message: 'User created successfully',
 			user: newUser,
 		});
@@ -67,16 +77,12 @@ export const register = async (req: Request, res: Response) => {
 export const resetPasswordRequest = async (req: Request, res: Response) => {
 	try {
 		await authService.resetPasswordRequest(req.body.email);
-		res.status(
-			HttpStatus.OK
-		).json({
+		res.status(HttpStatus.OK).json({
 			message: 'An OTP has been sent to your email, please check',
 		});
 	} catch (err: any) {
 		console.log(err);
-		res.status(
-			HttpStatus.BAD_REQUEST
-		).json({
+		res.status(HttpStatus.BAD_REQUEST).json({
 			error: err.message,
 		});
 	}
@@ -95,7 +101,7 @@ export const resetPasswordVerification = async (req: any, res: Response) => {
 			secure: process.env.NODE_ENV === 'production',
 			path: '/',
 			sameSite: 'strict',
-			maxAge: 0
+			maxAge: 0,
 		});
 		res.setHeader('Set-Cookie', [csfParam]);
 		res.status(HttpStatus.OK).json({
@@ -103,8 +109,8 @@ export const resetPasswordVerification = async (req: any, res: Response) => {
 		});
 	} catch (err: any) {
 		console.log(err);
-		res.status(HttpStatus.UNAUTHORIZED).json({
-			error: err.message,
+		res.status(err.statusCode).json({
+			error: err.message
 		});
 	}
 };
@@ -127,7 +133,6 @@ export const verifyEmail = async (req: Request, res: Response) => {
 	}
 };
 
-
 export const verifyOTP = async (req: Request, res: Response) => {
 	try {
 		const { otp, email } = req.body;
@@ -138,9 +143,9 @@ export const verifyOTP = async (req: Request, res: Response) => {
 			path: '/',
 			sameSite: 'strict',
 			maxAge:
-			parseInt(
-				process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
-			) * 1000,
+				parseInt(
+					process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
+				) * 1000,
 		});
 		res.setHeader('Set-Cookie', [resetCookie]);
 		res.status(HttpStatus.OK).json({
@@ -168,12 +173,12 @@ export const googleAuthentication = async (req: Request, res: Response) => {
 	return res.redirect(`${clientUrl}/dashboard`);
 };
 
-// export const tokenInfo = async (req: Request, res: Response) => {
-// 	try {
-// 		const { aToken, rToken } = req.cookies;
-// 		const tokenInfo = await authService.tokenInfo(aToken, rToken);
-// 		res.status(HttpStatus.OK).json(tokenInfo);
-// 	} catch (err: any) {
-// 		res.status(HttpStatus.UNAUTHORIZED).json({ error: err.message });
-// 	}
-// }
+export const tokenInfo = async (req: Request, res: Response) => {
+	try {
+		const { aToken } = req.cookies;
+		const tokenInfo = await authService.tokenInfo(aToken);
+		res.status(HttpStatus.OK).json(tokenInfo);
+	} catch (err: any) {
+		res.status(HttpStatus.UNAUTHORIZED).json({ error: err.message });
+	}
+};
