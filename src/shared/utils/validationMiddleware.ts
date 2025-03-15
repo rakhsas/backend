@@ -14,16 +14,12 @@ export function validateData(schema: z.ZodObject<any, any>) {
 					error.errors[0].path.toString().toUpperCase() +
 					' ' +
 					error.errors[0].message;
-				res.status(
-					HttpStatus.BAD_REQUEST,
-				).json({
+				res.status(HttpStatus.BAD_REQUEST).json({
 					error: 'Invalid data',
 					details: errorMsg,
 				});
 			} else {
-				res.status(
-					HttpStatus.INTERNAL_SERVER_ERROR
-				).json({
+				res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
 					error: 'Internal Server Error',
 				});
 			}

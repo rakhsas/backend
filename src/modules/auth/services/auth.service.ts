@@ -3,7 +3,10 @@ import {
 	InvalidCredentialsException,
 	UserAlreadyExistsException,
 } from '../../../shared/exceptions/user.exception';
-import { PasswordMatchException, PasswordMismatchException } from '../../../shared/exceptions/auth.exception';
+import {
+	PasswordMatchException,
+	PasswordMismatchException,
+} from '../../../shared/exceptions/auth.exception';
 import jwt from 'jsonwebtoken';
 import { CryptoUtil } from '../../../shared/utils/crypto.utils';
 import nodemailer from 'nodemailer';
@@ -49,10 +52,10 @@ export const generateTokens = async (user: any) => {
 			),
 		};
 		const aToken = jwt.sign(payload, process.env.ATOKEN_SECRET || '', {
-			expiresIn: (process.env.ATOKEN_VALIDITY_DURATION as StringValue),
+			expiresIn: process.env.ATOKEN_VALIDITY_DURATION as StringValue,
 		});
 		const rToken = jwt.sign(payload, process.env.RTOKEN_SECRET || '', {
-			expiresIn: (process.env.RTOKEN_VALIDITY_DURATION as StringValue),
+			expiresIn: process.env.RTOKEN_VALIDITY_DURATION as StringValue,
 		});
 		return {
 			aToken,
@@ -66,25 +69,25 @@ export const generateTokens = async (user: any) => {
 
 export const register = async (registerDTO: CreateUserDto) => {
 	try {
-        const user = await userService.findByEmail(registerDTO.email);
-        
-        if (user) throw new UserAlreadyExistsException();
+		const user = await userService.findByEmail(registerDTO.email);
 
-        // Ensure password is null for Google users
-        if (registerDTO.provider === 'google') {
-            registerDTO.password = null;
-            registerDTO.verified = true;
-        }
+		if (user) throw new UserAlreadyExistsException();
 
-        const createdUser = await userService.save(registerDTO);
+		// Ensure password is null for Google users
+		if (registerDTO.provider === 'google') {
+			registerDTO.password = null;
+			registerDTO.verified = true;
+		}
 
-        // Send verification email ONLY for manual signups
-        if (!registerDTO.provider) accountVerification(createdUser.email);
+		const createdUser = await userService.save(registerDTO);
 
-        return createdUser;
-    } catch (err) {
-        throw err;
-    }
+		// Send verification email ONLY for manual signups
+		if (!registerDTO.provider) accountVerification(createdUser.email);
+
+		return createdUser;
+	} catch (err) {
+		throw err;
+	}
 };
 
 export const accountVerification = async (email: string) => {
@@ -109,10 +112,11 @@ export const generateVerificationLink = (email: string) => {
 			payload,
 			process.env.VTOKEN_SECRET || '',
 			{
-				expiresIn: (process.env.VERIFICATION_TOKEN_DURATION as StringValue),
+				expiresIn: process.env
+					.VERIFICATION_TOKEN_DURATION as StringValue,
 			},
 		);
-		return `${process.env.CLIENT_URL}/api/authenticate/verify?csf=${verificationToken}`;
+		return `${process.env.API_URL}/api/authenticate/verify?csf=${verificationToken}`;
 	} catch (err) {
 		throw err;
 	}
@@ -163,7 +167,7 @@ export const resetPasswordVerification = async (
 
 		const isMatch = await userService.comparePassword(
 			password,
-			user.password
+			user.password,
 		);
 		if (isMatch) throw new PasswordMatchException();
 		const hashedPassword = await userService.hashPassword(password);
@@ -232,9 +236,16 @@ export async function verifyOTP(otp: string, email: string): Promise<string> {
 
 		const result = await otpService.verifyOTP(user, otp);
 		const payload = {
-			sub: CryptoUtil.encrypt(user.id, process.env.PAYLOAD_ENCRYPTION_KEY || ''),
-		}
-		const resetToken = generateSingleUseToken(payload, process.env.RTOKEN_SECRET || '', (process.env.RTOKEN_VALIDITY_DURATION as StringValue));
+			sub: CryptoUtil.encrypt(
+				user.id,
+				process.env.PAYLOAD_ENCRYPTION_KEY || '',
+			),
+		};
+		const resetToken = generateSingleUseToken(
+			payload,
+			process.env.RTOKEN_SECRET || '',
+			process.env.RTOKEN_VALIDITY_DURATION as StringValue,
+		);
 
 		return resetToken;
 	} catch (err) {
@@ -242,68 +253,62 @@ export async function verifyOTP(otp: string, email: string): Promise<string> {
 	}
 }
 type Unit =
-| "Years"
-| "Year"
-| "Yrs"
-| "Yr"
-| "Y"
-| "Weeks"
-| "Week"
-| "W"
-| "Days"
-| "Day"
-| "D"
-| "Hours"
-| "Hour"
-| "Hrs"
-| "Hr"
-| "H"
-| "Minutes"
-| "Minute"
-| "Mins"
-| "Min"
-| "M"
-| "Seconds"
-| "Second"
-| "Secs"
-| "Sec"
-| "s"
-| "Milliseconds"
-| "Millisecond"
-| "Msecs"
-| "Msec"
-| "Ms";
+	| 'Years'
+	| 'Year'
+	| 'Yrs'
+	| 'Yr'
+	| 'Y'
+	| 'Weeks'
+	| 'Week'
+	| 'W'
+	| 'Days'
+	| 'Day'
+	| 'D'
+	| 'Hours'
+	| 'Hour'
+	| 'Hrs'
+	| 'Hr'
+	| 'H'
+	| 'Minutes'
+	| 'Minute'
+	| 'Mins'
+	| 'Min'
+	| 'M'
+	| 'Seconds'
+	| 'Second'
+	| 'Secs'
+	| 'Sec'
+	| 's'
+	| 'Milliseconds'
+	| 'Millisecond'
+	| 'Msecs'
+	| 'Msec'
+	| 'Ms';
 
 type UnitAnyCase = Unit | Uppercase<Unit> | Lowercase<Unit>;
 
 type StringValue =
-| `${number}`
-| `${number}${UnitAnyCase}`
-| `${number} ${UnitAnyCase}`;
+	| `${number}`
+	| `${number}${UnitAnyCase}`
+	| `${number} ${UnitAnyCase}`;
 
-export const generateSingleUseToken = (payload: any, secret: string, duration: StringValue) => {
+export const generateSingleUseToken = (
+	payload: any,
+	secret: string,
+	duration: StringValue,
+) => {
 	return jwt.sign(payload, secret, {
 		expiresIn: duration,
 	});
-}
+};
 
-// export const tokenInfo = async (aToken: string, rToken: string) => {
-// 	try {
-// 		const aTokenPayload = jwt.verify(
-// 			aToken,
-// 			process.env.ATOKEN_SECRET ||
-// 				'',
-// 		) as any;
-// 		const rTokenPayload = jwt.verify(
-// 			rToken,
-// 			process.env.RTOKEN_SECRET ||
-// 				'',
-// 		) as any;
-// 		return {
-// 			aTokenPayload,
-// 			rTokenPayload,
-// 		};
-// 	} catch (err) {
-// 		throw err;
-// 	}
-// }
+export const tokenInfo = async (aToken: string) => {
+	try {
+		const aTRemainingTime =
+			(jwt.decode(aToken) as any).exp / Math.floor(Date.now() / 1000);
+		if (aTRemainingTime <= 0) return { isAuthenticated: false };
+		return { isAuthenticated: true };
+	} catch (err) {
+		return { isAuthenticated: false };
+	}
+};

@@ -16,11 +16,11 @@ const columns = {
 	updated_at: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
 };
 
-const userModel = createModel({ 
-	tableName: 'users', 
-	columns, 
-	foreignKey: [] }
-);
+const userModel = createModel({
+	tableName: 'users',
+	columns,
+	foreignKey: [],
+});
 
 export default {
 	syncTable: async () => {

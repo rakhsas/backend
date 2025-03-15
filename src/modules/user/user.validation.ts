@@ -8,8 +8,8 @@ export const userRegistrationSchema = z.object({
 	username: z.string().min(3),
 	password: z
 		.string()
-		.min(8)
-		.max(12)
+		.min(12)
+		.max(24)
 		.regex(/[A-Z]/, 'upper-case')
 		.regex(/[a-z]/, 'lower-case')
 		.regex(/[^\w]/, 'special character')

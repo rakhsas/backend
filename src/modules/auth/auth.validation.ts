@@ -2,14 +2,13 @@ import z from 'zod';
 
 export const loginSchema = z.object({
 	email: z.string().email(),
-	password: z.string()
+	password: z.string(),
 });
 
 export const resetPasswordSchema = z.object({
 	password: z
 		.string()
-		.min(8)
-		.max(12)
+		.min(12)
 		.regex(/[A-Z]/, 'Must contain at least one upper-case letter')
 		.regex(/[a-z]/, 'Must contain at least one lower-case letter')
 		.regex(/[^\w]/, 'Must contain at least one special character')
