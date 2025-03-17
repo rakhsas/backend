@@ -50,6 +50,7 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const register = async (req: Request, res: Response) => {
+	console.log('Register request:', req.body);
 	try {
 		const createUserDto = new CreateUserDto(req.body);
 		const newUser = await authService.register(createUserDto);

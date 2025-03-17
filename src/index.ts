@@ -9,8 +9,18 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import session from 'express-session';
+import { Server } from "socket.io";
 import cors from 'cors'
+import { add } from 'winston';
+import { CreateChatDto } from './modules/chat/dto/chat.dto';
+import { saveChat } from './modules/chat/service/chat.service';
 
+
+function addUser(socketId: string, userId: string, map: Map<string, string>) {
+	if (!map.has(socketId)) {
+		map.set(socketId, userId);
+	}
+}
 async function bootstrap() {
 	try {
 		const app = express();
@@ -54,13 +64,51 @@ async function bootstrap() {
 		} catch (err: any) {
 			throw new Error(`Failed to load entities: ${err.message}`);
 		}
-
-		// Start the server and listen on a specific port
 		const port = process.env.PORT || 3000;
-		app.listen(port, () => {
-			logger.info(`Server is running on port ${port}`);
+		
+		const map: Map<string, string> = new Map();
+		
+		const io = new Server(3000, {
+			cors: {
+				origin: "*",
+			}
 		});
-
+		
+		io.on("connection", (socket) => {
+			console.log("A user connected:", socket.id);
+		
+			socket.on("message", async (data) => {
+				console.log("Received message:", data);
+				const { 
+					sender_id, 
+					receiver_id, 
+					type, 
+					message, 
+					media_url 
+				} = data;
+				if (!sender_id || !receiver_id || !message) {
+					return socket.emit("error", { message: "Missing required fields" });
+				}
+				try {
+					const chatDto = new CreateChatDto({
+						sender_id,
+						receiver_id,
+						type,
+						message,
+						media_url,
+					});
+					const newChat = await saveChat(chatDto);
+					io.emit("message", newChat);
+				} catch (error) {
+					console.error("Error saving message:", error);
+					socket.emit("error", { message: "Failed to save message" });
+				}
+			});
+		
+			socket.on("disconnect", () => {
+				console.log("User disconnected:", socket.id);
+			});
+		});
 		logger.info('Application initialized successfully!');
 	} catch (error: any) {
 		logger.error({

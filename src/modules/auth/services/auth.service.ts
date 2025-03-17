@@ -65,6 +65,7 @@ export const generateTokens = async (user: any) => {
 };
 
 export const register = async (registerDTO: CreateUserDto) => {
+	console.log('Register DTO:', registerDTO);
 	try {
         const user = await userService.findByEmail(registerDTO.email);
         
