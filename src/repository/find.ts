@@ -1,6 +1,7 @@
 import { config as pool } from '../core/dbconfig/config';
 import pg from 'pg';
 import { IRelations } from '../shared/utils/interfaces';
+import { table } from 'console';
 
 const findById = async (tableName: string, id: string) => {
 	try {
@@ -99,6 +100,37 @@ const findByCondition = async (tableName: string, condition: any) => {
 	}
 };
 
+const findOneWithRelations = async (
+	tableName: string,
+	primaryKey: string,
+	primaryKeyValue: string | number,
+	relations: IRelations[],
+) => {
+	try {
+		// Generate all JOINs
+		const joinClauses = relations
+			.map(
+				relation =>
+					`LEFT JOIN ${relation.tableName} ON ${tableName}.${primaryKey} = ${relation.tableName}.${relation.foreignKey}`
+			)
+			.join(' ');
+
+		const query = `
+			SELECT * FROM ${tableName}
+			${joinClauses}
+			WHERE ${tableName}.${primaryKey} = $1
+			LIMIT 1;
+		`;
+
+		const result = await (pool as pg.Pool).query(query, [primaryKeyValue]);
+		return result.rows[0];
+	} catch (err: any) {
+		console.error(`Error finding record with relations in ${tableName}`, err);
+		throw err;
+	}
+};
+
+
 const findWithRelations = async (
 	tableName: string,
 	primaryKey: string,
@@ -172,4 +204,5 @@ export {
 	findWithRelations,
 	findByCondition,
 	findWithRelationsAndConditions,
+	findOneWithRelations
 };

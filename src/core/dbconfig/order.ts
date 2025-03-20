@@ -1,5 +1,6 @@
 export const entityOrder = [
 	'user.entity.ts',
+	'sexual-preferences.entity.ts',
 	'profile.entity.ts',
 	'profileViews.entity.ts',
 	'likes.entity.ts',
