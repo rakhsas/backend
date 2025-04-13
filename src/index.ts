@@ -19,21 +19,20 @@ async function bootstrap() {
 		// cors
 		app.use(
 			cors({
-				origin: 'http://localhost:4200',
+				origin: process.env.CLIENT_URL?.split(',') || [],
 				credentials: true,
-			})
+			}),
 		);
 		app.use(
 			session({
 				secret: process.env.JWT_SECRET as string,
 				resave: false,
 				saveUninitialized: false,
-			})
+			}),
 		);
 		app.use(passport.initialize());
 		app.use(passport.session());
 		dotenv.config();
-
 		logger.info('Starting application...');
 
 		try {

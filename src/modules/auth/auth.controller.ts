@@ -1,29 +1,34 @@
 import * as authService from './services/auth.service';
 import { LoginDTO } from './dto/login.dto';
 import { CreateUserDto } from '../user/dto/user.dto';
-import * as cookie from 'cookie';
 import { Request, Response } from 'express';
 import HttpStatus from 'http-status';
+const cookie = require('cookie');
 
 const setAuthCookies = (res: Response, aToken: string, rToken: string) => {
-	const accessTokenCookie = cookie.serialize('aToken', aToken, {
+	const isProd = process.env.NODE_ENV === 'production';
+
+	console.log('Setting authentication cookies - ENV:', process.env.NODE_ENV);
+
+	const cookieOptions = {
 		httpOnly: true,
-		secure: process.env.NODE_ENV === 'production',
+		secure: isProd,
 		path: '/',
-		sameSite: 'strict',
-		maxAge:
-			parseInt(process.env.ATOKEN_VALIDITY_DURATION_IN_SECONDS || '10') *
-			1000,
+		sameSite: isProd ? 'None' : 'Lax', // ✅ Use 'Lax' in dev to avoid secure conflict
+	};
+
+	const accessTokenCookie = cookie.serialize('aToken', aToken, {
+		...cookieOptions,
+		maxAge: parseInt(
+			process.env.ATOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
+		),
 	});
 
 	const refreshTokenCookie = cookie.serialize('rToken', rToken, {
-		httpOnly: true,
-		secure: process.env.NODE_ENV === 'production',
-		path: '/',
-		sameSite: 'strict',
-		maxAge:
-			parseInt(process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10') *
-			1000,
+		...cookieOptions,
+		maxAge: parseInt(
+			process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
+		),
 	});
 
 	res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
@@ -31,6 +36,8 @@ const setAuthCookies = (res: Response, aToken: string, rToken: string) => {
 
 // Helper function to set CORS headers
 const setCorsHeaders = (res: Response) => {
+	console.log('Setting CORS headers');
+	console.log('Origin:', res.req.headers.origin);
 	res.setHeader('Access-Control-Allow-Origin', res.req.headers.origin || '');
 	res.setHeader(
 		'Access-Control-Allow-Methods',
@@ -48,7 +55,7 @@ export const login = async (req: Request, res: Response) => {
 	try {
 		const loginDTO = new LoginDTO(req.body);
 		const { aToken, rToken } = await authService.login(loginDTO);
-
+		console.log('Login successful:', aToken, rToken);
 		setCorsHeaders(res);
 		setAuthCookies(res, aToken, rToken);
 
@@ -100,7 +107,7 @@ export const resetPasswordVerification = async (req: any, res: Response) => {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === 'production',
 			path: '/',
-			sameSite: 'strict',
+			sameSite: 'None',
 			maxAge: 0,
 		});
 		res.setHeader('Set-Cookie', [csfParam]);
@@ -110,7 +117,7 @@ export const resetPasswordVerification = async (req: any, res: Response) => {
 	} catch (err: any) {
 		console.log(err);
 		res.status(err.statusCode).json({
-			error: err.message
+			error: err.message,
 		});
 	}
 };
@@ -141,7 +148,7 @@ export const verifyOTP = async (req: Request, res: Response) => {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === 'production',
 			path: '/',
-			sameSite: 'strict',
+			sameSite: 'None',
 			maxAge:
 				parseInt(
 					process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
@@ -176,6 +183,8 @@ export const googleAuthentication = async (req: Request, res: Response) => {
 export const tokenInfo = async (req: Request, res: Response) => {
 	try {
 		const { aToken } = req.cookies;
+		console.log(req.cookies);
+		console.log('aToken:', aToken);
 		const tokenInfo = await authService.tokenInfo(aToken);
 		res.status(HttpStatus.OK).json(tokenInfo);
 	} catch (err: any) {
