@@ -27,11 +27,15 @@ passport.use(
 
 				if (user) {
 					// If user exists but used manual signup, update provider to Google
-					if (user.provider !== 'google') {
-						await userService.update(
-							{ provider: 'google', verified: true },
-							{ id: user.id },
+					if (user.provider === '') {
+						console.log('herereeeeeeeeeeeeeeeee');
+						const res = await userService.update(
+							{ provider: 'hybrid', verified: true },
+							{ email },
+							false,
+							false,
 						);
+						console.log('result: ', res);
 					}
 				} else {
 					// Create new user if they don't exist
@@ -51,6 +55,7 @@ passport.use(
 				const result = await userService.update(
 					{ rToken },
 					{ id: user.id },
+					true,
 				);
 				if (!result) throw new RepositoryExceptionUpdate();
 				return done(null, { user, aToken, rToken });
