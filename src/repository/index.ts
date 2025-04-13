@@ -9,8 +9,12 @@ import {
 	findWithRelations,
 	findByCondition,
 	findWithRelationsAndConditions,
+	findOneWithRelations,
+	findWithRelationsAndConditionsPagination,
 } from './find';
 import { deleteById, deleteByCondition } from './delete';
+import { executeSqlQuery } from './query';
+
 export const repository = {
 	save,
 	update,
@@ -25,4 +29,7 @@ export const repository = {
 	findWithRelationsAndConditions,
 	deleteById,
 	deleteByCondition,
+	findOneWithRelations,
+	findWithRelationsAndConditionsPagination,
+	executeSqlQuery,
 };

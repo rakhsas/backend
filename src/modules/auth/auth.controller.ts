@@ -1,29 +1,32 @@
 import * as authService from './services/auth.service';
 import { LoginDTO } from './dto/login.dto';
 import { CreateUserDto } from '../user/dto/user.dto';
-import * as cookie from 'cookie';
 import { Request, Response } from 'express';
 import HttpStatus from 'http-status';
+const cookie = require('cookie');
 
 const setAuthCookies = (res: Response, aToken: string, rToken: string) => {
-	const accessTokenCookie = cookie.serialize('aToken', aToken, {
+	const isProd = process.env.NODE_ENV === 'production';
+
+	const cookieOptions = {
 		httpOnly: true,
-		secure: process.env.NODE_ENV === 'production',
+		secure: isProd,
 		path: '/',
-		sameSite: 'strict',
-		maxAge:
-			parseInt(process.env.ATOKEN_VALIDITY_DURATION_IN_SECONDS || '10') *
-			1000,
+		sameSite: isProd ? 'None' : 'Lax', // ✅ Use 'Lax' in dev to avoid secure conflict
+	};
+
+	const accessTokenCookie = cookie.serialize('aToken', aToken, {
+		...cookieOptions,
+		maxAge: parseInt(
+			process.env.ATOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
+		),
 	});
 
 	const refreshTokenCookie = cookie.serialize('rToken', rToken, {
-		httpOnly: true,
-		secure: process.env.NODE_ENV === 'production',
-		path: '/',
-		sameSite: 'strict',
-		maxAge:
-			parseInt(process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10') *
-			1000,
+		...cookieOptions,
+		maxAge: parseInt(
+			process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
+		),
 	});
 
 	res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
@@ -48,7 +51,6 @@ export const login = async (req: Request, res: Response) => {
 	try {
 		const loginDTO = new LoginDTO(req.body);
 		const { aToken, rToken } = await authService.login(loginDTO);
-
 		setCorsHeaders(res);
 		setAuthCookies(res, aToken, rToken);
 
@@ -100,7 +102,7 @@ export const resetPasswordVerification = async (req: any, res: Response) => {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === 'production',
 			path: '/',
-			sameSite: 'strict',
+			sameSite: 'None',
 			maxAge: 0,
 		});
 		res.setHeader('Set-Cookie', [csfParam]);
@@ -110,7 +112,7 @@ export const resetPasswordVerification = async (req: any, res: Response) => {
 	} catch (err: any) {
 		console.log(err);
 		res.status(err.statusCode).json({
-			error: err.message
+			error: err.message,
 		});
 	}
 };
@@ -141,7 +143,7 @@ export const verifyOTP = async (req: Request, res: Response) => {
 			httpOnly: true,
 			secure: process.env.NODE_ENV === 'production',
 			path: '/',
-			sameSite: 'strict',
+			sameSite: 'None',
 			maxAge:
 				parseInt(
 					process.env.RTOKEN_VALIDITY_DURATION_IN_SECONDS || '10',
