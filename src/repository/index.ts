@@ -9,6 +9,7 @@ import {
 	findWithRelations,
 	findByCondition,
 	findWithRelationsAndConditions,
+	findOneWithRelations,
 } from './find';
 import { deleteById, deleteByCondition } from './delete';
 export const repository = {
@@ -25,4 +26,5 @@ export const repository = {
 	findWithRelationsAndConditions,
 	deleteById,
 	deleteByCondition,
+	findOneWithRelations
 };

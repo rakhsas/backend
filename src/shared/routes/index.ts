@@ -2,7 +2,8 @@ import userRoutes from './user.routes';
 import authRoutes from './auth.routes';
 import passwordRoutes from './password.routes';
 import likesRoutes from './likes.routes';
-
+import uploadRoutes from './upload.routes';
+import locationRoutes from './location.routes';
 // import authMiddleware from '../middleware/auth.middleware.js';
 import express from 'express';
 import authMiddleware from '../middleware/auth.middleware';
@@ -12,4 +13,6 @@ export default (app: express.Application) => {
 	app.use('/api/authenticate', authRoutes);
 	app.use('/api', passwordRoutes);
 	app.use('/api/likes', authMiddleware, likesRoutes);
+	app.use('/api', authMiddleware, uploadRoutes);
+	app.use('/api/location', authMiddleware, locationRoutes);
 };

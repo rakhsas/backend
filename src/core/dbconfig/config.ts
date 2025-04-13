@@ -17,11 +17,16 @@ if (process.env.NODE_ENV === 'test') {
 	config = require('../../tests/mockDatabase').default;
 } else {
 	config = new Pool({
-		user: process.env.POSTGRES_USER,
-		host: process.env.POSTGRES_CONTAINER_NAME,
-		database: process.env.POSTGRES_DB,
-		password: process.env.POSTGRES_PASSWORD,
-		port: Number(process.env.POSTGRES_PORT),
+		// user: process.env.POSTGRES_USER,
+		// host: process.env.POSTGRES_CONTAINER_NAME,
+		// database: process.env.POSTGRES_DB,
+		// password: process.env.POSTGRES_PASSWORD,
+		// port: Number(process.env.POSTGRES_PORT),
+		user: 'postgres',
+		host: 'yamabiko.proxy.rlwy.net',
+		database: 'railway',
+		password: 'JJrkQwYITMrDhohSnhgZhVBIFfXsICnN',
+		port: 38009,
 	});
 }
 
@@ -29,13 +34,12 @@ const connectWithRetry = async (maxRetries = 5, delay = 2000) => {
 	for (let attempt = 1; attempt <= maxRetries; attempt++) {
 		try {
 			await (config as pg.Pool).connect();
-			// console.log('Connected to the database successfully.');
 			logger.info('Connected to the database successfully.');
 			return;
 		} catch (error: any) {
 			logger.error(
 				`Attempt ${attempt} - Failed to connect to the database:`,
-				error.message,
+				error,
 			);
 			if (attempt === maxRetries) {
 				logger.error('Max retries reached. Exiting application.');
